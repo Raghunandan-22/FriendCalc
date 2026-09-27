@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FriendCalc – Friendship Calculator</title>
+<meta name="description" content="Calculate a fun friendship percentage between you and your friend with FriendCalc.">
+<meta property="og:title" content="FriendCalc – Friendship Calculator">
+<meta property="og:description" content="Calculate a fun friendship percentage between you and your friend with FriendCalc.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pink:#ff6f9c; --pink-deep:#e94f88; --lav:#8f7ee8; --peach:#ffb199;
+  --bg1:#fff0f6; --bg2:#f3eeff; --card:rgba(255,255,255,0.6); --card-border:rgba(255,255,255,0.8);
+  --text:#2c2440; --text-soft:#6b6180; --shadow: 0 10px 30px rgba(140,100,180,0.18);
+  box-sizing:border-box;
+}
+*{box-sizing:inherit; margin:0; padding:0;}
+html{scroll-behavior:smooth; scroll-padding-top:env(safe-area-inset-top,0px);}
+body{
+  font-family:'Nunito',sans-serif; color:var(--text);
+  background:linear-gradient(160deg,var(--bg1),var(--bg2) 60%, #eef6ff);
+  min-height:100%; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  overflow-x:hidden;
+}
+body[data-theme="dark"]{
+  --bg1:#1c1730; --bg2:#241b3d; --card:rgba(40,32,64,0.55); --card-border:rgba(255,255,255,0.12);
+  --text:#f3eefc; --text-soft:#c3b8dd; --shadow:0 10px 30px rgba(0,0,0,0.4);
+  background:linear-gradient(160deg,var(--bg1),var(--bg2) 60%, #191428);
+}
+h1,h2,h3,.logo,.big-pct{font-family:'Baloo 2',cursive;}
+a{color:inherit}
+.container{max-width:1100px; margin:0 auto; padding:0 24px;}
+img{max-width:100%}
+ 
+/* Nav */
+header{position:sticky; top:env(safe-area-inset-top,0px); z-index:50; backdrop-filter:blur(14px);
+  background:rgba(255,255,255,0.55); border-bottom:1px solid var(--card-border);}
+body[data-theme="dark"] header{background:rgba(28,23,48,0.6);}
+nav{display:flex; align-items:center; justify-content:space-between; padding:14px 24px; max-width:1100px; margin:0 auto;}
+.logo{font-size:1.3rem; font-weight:700; display:flex; gap:8px; align-items:center;}
+.nav-links{display:flex; gap:26px; list-style:none;}
+.nav-links a{text-decoration:none; font-weight:700; color:var(--text-soft); padding:6px 2px; border-bottom:2px solid transparent; transition:.2s;}
+.nav-links a:hover, .nav-links a:focus-visible{color:var(--pink-deep); border-color:var(--pink-deep);}
+.theme-btn{background:var(--card); border:1px solid var(--card-border); border-radius:999px; width:42px; height:42px; font-size:1.1rem; cursor:pointer; transition:.2s;}
+.theme-btn:hover{transform:scale(1.08);}
+.menu-btn{display:none; background:none; border:none; font-size:1.6rem; cursor:pointer; color:var(--text);}
+ 
+/* Focus */
+a:focus-visible, button:focus-visible, input:focus-visible{outline:3px solid var(--lav); outline-offset:2px; border-radius:8px;}
+ 
+/* Hero */
+.hero{position:relative; padding:80px 24px 100px; text-align:center; overflow:hidden;}
+.floaty{position:absolute; font-size:2rem; opacity:.55; animation:float 7s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0deg);} 50%{transform:translateY(-22px) rotate(8deg);}}
+.hero h1{font-size:clamp(2.1rem,5vw,3.4rem); line-height:1.15; max-width:760px; margin:0 auto 18px;}
+.hero p{font-size:1.15rem; color:var(--text-soft); max-width:520px; margin:0 auto 34px;}
+.btn{display:inline-flex; align-items:center; gap:8px; font-weight:800; font-family:'Baloo 2',cursive;
+  font-size:1.05rem; padding:16px 34px; border-radius:999px; border:none; cursor:pointer;
+  background:linear-gradient(135deg,var(--pink),var(--lav)); color:#fff; box-shadow:var(--shadow); transition:transform .18s, box-shadow .18s;}
+.btn:hover{transform:translateY(-3px) scale(1.02); box-shadow:0 16px 34px rgba(140,100,180,0.3);}
+.btn:active{transform:translateY(0) scale(.98);}
+.btn.secondary{background:var(--card); color:var(--pink-deep); border:1px solid var(--card-border); box-shadow:none;}
+ 
+/* Sections */
+section{padding:70px 24px;}
+.section-title{text-align:center; font-size:clamp(1.7rem,3.4vw,2.3rem); margin-bottom:12px;}
+.section-sub{text-align:center; color:var(--text-soft); max-width:520px; margin:0 auto 46px; font-size:1.05rem;}
+.fade{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease;}
+.fade.show{opacity:1; transform:translateY(0);}
+ 
+/* Glass card */
+.glass{background:var(--card); border:1px solid var(--card-border); border-radius:26px; backdrop-filter:blur(16px); box-shadow:var(--shadow);}
+ 
+/* Calculator */
+.calc-card{max-width:520px; margin:0 auto; padding:38px clamp(20px,5vw,44px);}
+.field{margin-bottom:20px; text-align:left;}
+.field label{display:block; font-weight:800; margin-bottom:8px; font-size:.95rem;}
+.field input{width:100%; padding:14px 16px; border-radius:14px; border:2px solid var(--card-border);
+  background:rgba(255,255,255,0.7); font-size:1rem; font-family:inherit; color:var(--text); transition:border-color .2s;}
+body[data-theme="dark"] .field input{background:rgba(255,255,255,0.06);}
+.field input:focus{border-color:var(--pink);}
+.error-msg{color:#d1336a; font-size:.88rem; margin-top:6px; min-height:1.1em;}
+.calc-card .btn{width:100%; justify-content:center; margin-top:6px;}
+ 
+/* Result */
+.result-wrap{display:none; text-align:center; margin-top:8px;}
+.result-wrap.show{display:block; animation:pop .5s ease;}
+@keyframes pop{from{opacity:0; transform:scale(.9);} to{opacity:1; transform:scale(1);}}
+.ring-box{position:relative; width:180px; height:180px; margin:14px auto 8px;}
+.ring-box svg{width:100%; height:100%; transform:rotate(-90deg);}
+.ring-bg{fill:none; stroke:var(--card-border); stroke-width:12;}
+.ring-fg{fill:none; stroke:url(#ringGrad); stroke-width:12; stroke-linecap:round; transition:stroke-dashoffset 1.1s cubic-bezier(.25,.8,.3,1);}
+.big-pct{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:2.2rem; font-weight:800;}
+.result-msg{font-size:1.25rem; font-weight:700; margin:10px 0 18px;}
+.result-actions{display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+.result-actions .btn{padding:12px 22px; font-size:.95rem;}
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap;}
+.disclaimer{font-size:.82rem; color:var(--text-soft); margin-top:16px;}
+ 
+/* Steps */
+.steps{max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:16px;}
+.step{display:flex; gap:16px; align-items:flex-start; padding:18px 20px;}
+.step .num{font-family:'Baloo 2',cursive; font-weight:800; font-size:1.2rem; color:var(--pink-deep); width:32px; flex:none;}
+.note-box{max-width:640px; margin:26px auto 0; padding:16px 20px; font-size:.92rem; color:var(--text-soft); text-align:center;}
+ 
+/* Feature grid */
+.grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:20px; max-width:1000px; margin:0 auto;}
+.feat{padding:26px 22px; text-align:left; transition:transform .2s;}
+.feat:hover{transform:translateY(-4px);}
+.feat .ic{font-size:1.8rem; margin-bottom:10px; display:block;}
+.feat h3{font-size:1.05rem; margin-bottom:6px;}
+.feat p{color:var(--text-soft); font-size:.92rem;}
+ 
+/* History */
+.history-card{max-width:560px; margin:0 auto; padding:30px 26px;}
+.history-list{list-style:none; display:flex; flex-direction:column; gap:10px; margin:16px 0;}
+.history-list li{display:flex; justify-content:space-between; padding:10px 14px; border-radius:12px; background:rgba(255,255,255,0.45); font-weight:700;}
+body[data-theme="dark"] .history-list li{background:rgba(255,255,255,0.06);}
+.history-empty{color:var(--text-soft); text-align:center; padding:14px 0; font-size:.92rem;}
+.hist-actions{display:flex; justify-content:flex-end;}
+.link-btn{background:none; border:none; color:var(--pink-deep); font-weight:800; cursor:pointer; font-size:.9rem; padding:6px;}
+ 
+/* About */
+.about-card{max-width:640px; margin:0 auto; padding:34px 30px; text-align:center;}
+.about-card p{color:var(--text-soft); margin-top:10px; line-height:1.6;}
+ 
+/* Footer */
+footer{padding:50px 24px 40px; text-align:center; border-top:1px solid var(--card-border);}
+footer .logo{justify-content:center; margin-bottom:8px;}
+.foot-tag{color:var(--text-soft); margin-bottom:18px;}
+.foot-links{display:flex; gap:22px; justify-content:center; flex-wrap:wrap; list-style:none; margin-bottom:18px;}
+.foot-links a{text-decoration:none; font-weight:700; color:var(--text-soft);}
+.foot-links a:hover{color:var(--pink-deep);}
+.copyright{font-size:.85rem; color:var(--text-soft);}
+ 
+@media (max-width:720px){
+  .nav-links{position:fixed; top:0; right:0; height:100%; width:min(72vw,280px); background:var(--bg1);
+    flex-direction:column; padding:90px 28px; gap:22px; transform:translateX(100%); transition:transform .3s ease; box-shadow:-10px 0 30px rgba(0,0,0,.15);}
+  body[data-theme="dark"] .nav-links{background:var(--bg2);}
+  .nav-links.open{transform:translateX(0);}
+  .menu-btn{display:block;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important;}
+}
+</style>
+</head>
+<body>
+ 
+<header>
+<nav>
+  <div class="logo">💕 FriendCalc</div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#calculator">Calculator</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">🌙</button>
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button>
+  </div>
+</nav>
+</header>
+ 
+<main>
+<section class="hero" id="home">
+  <span class="floaty" style="top:10%; left:8%; animation-delay:0s;" aria-hidden="true">❤️</span>
+  <span class="floaty" style="top:65%; left:14%; animation-delay:1.2s;" aria-hidden="true">✨</span>
+  <span class="floaty" style="top:20%; right:10%; animation-delay:.6s;" aria-hidden="true">🤝</span>
+  <span class="floaty" style="top:70%; right:12%; animation-delay:2s;" aria-hidden="true">⭐</span>
+  <h1>How Strong Is Your Friendship?</h1>
+  <p>Enter two names and discover your fun friendship compatibility score!</p>
+  <a href="#calculator" class="btn">Calculate Friendship →</a>
+</section>
+ 
+<section id="calculator">
+  <h2 class="section-title fade">Friendship Calculator</h2>
+  <p class="section-sub fade">Type in two names and see what the friend-o-meter says.</p>
+ 
+  <div class="glass calc-card fade">
+    <form id="calcForm" novalidate>
+      <div class="field">
+        <label for="nameA">Your Name</label>
+        <input type="text" id="nameA" name="nameA" placeholder="Enter your name" autocomplete="off" maxlength="40">
+        <p class="error-msg" id="errA"></p>
+      </div>
+      <div class="field">
+        <label for="nameB">Friend's Name</label>
+        <input type="text" id="nameB" name="nameB" placeholder="Enter your friend's name" autocomplete="off" maxlength="40">
+        <p class="error-msg" id="errB"></p>
+      </div>
+      <button type="submit" class="btn">Calculate Friendship 💖</button>
+    </form>
+ 
+    <div class="result-wrap" id="resultWrap" aria-live="polite">
+      <h3 class="section-title" style="font-size:1.3rem; margin-bottom:0;">Your Friendship Score</h3>
+      <div class="ring-box">
+        <svg viewBox="0 0 160 160">
+          <defs>
+            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff6f9c"/>
+              <stop offset="100%" stop-color="#8f7ee8"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="80" cy="80" r="70"></circle>
+          <circle class="ring-fg" id="ringFg" cx="80" cy="80" r="70" stroke-dasharray="440" stroke-dashoffset="440"></circle>
+        </svg>
+        <div class="big-pct"><span id="pctNum">0</span>%</div>
+      </div>
+      <p class="result-msg" id="resultMsg"></p>
+      <div class="result-actions">
+        <button class="btn secondary" id="againBtn" type="button">🔄 Calculate Again</button>
+        <button class="btn secondary" id="shareBtn" type="button">📤 Share Result</button>
+      </div>
+      <p class="disclaimer">Just for fun — not a scientific measurement of friendship.</p>
+    </div>
+  </div>
+</section>
+ 
+<section id="how">
+  <h2 class="section-title fade">How It Works</h2>
+  <p class="section-sub fade">Five simple steps to your friendship score.</p>
+  <div class="steps fade">
+    <div class="glass step"><span class="num">1</span><p>Enter your name.</p></div>
+    <div class="glass step"><span class="num">2</span><p>Enter your friend's name.</p></div>
+    <div class="glass step"><span class="num">3</span><p>Click Calculate Friendship.</p></div>
+    <div class="glass step"><span class="num">4</span><p>Get your fun friendship score.</p></div>
+    <div class="glass step"><span class="num">5</span><p>Share the result with your friend.</p></div>
+  </div>
+  <div class="glass note-box fade">FriendCalc is an entertainment tool. Friendship percentages are generated for fun and are not a scientific measurement.</div>
+</section>
+ 
+<section id="features">
+  <h2 class="section-title fade">Features</h2>
+  <div class="grid fade">
+    <div class="glass feat"><span class="ic">💯</span><h3>Fun Percentage</h3><p>Get a unique friendship score.</p></div>
+    <div class="glass feat"><span class="ic">⚡</span><h3>Instant Results</h3><p>Calculate your result instantly.</p></div>
+    <div class="glass feat"><span class="ic">📱</span><h3>Mobile Friendly</h3><p>Works beautifully on phones, tablets and desktops.</p></div>
+    <div class="glass feat"><span class="ic">📤</span><h3>Share Results</h3><p>Share your friendship score with friends.</p></div>
+    <div class="glass feat"><span class="ic">🌙</span><h3>Dark Mode</h3><p>Switch between light and dark themes.</p></div>
+    <div class="glass feat"><span class="ic">🔒</span><h3>Private</h3><p>Names are processed locally in your browser.</p></div>
+  </div>
+</section>
+ 
+<section id="history-section">
+  <h2 class="section-title fade">Friendship History</h2>
+  <div class="glass history-card fade">
+    <ul class="history-list" id="historyList"></ul>
+    <p class="history-empty" id="historyEmpty">No calculations yet — try the calculator above!</p>
+    <div class="hist-actions"><button class="link-btn" id="clearHistoryBtn">Clear history</button></div>
+  </div>
+</section>
+ 
+<section id="about">
+  <div class="glass about-card fade">
+    <h2>About FriendCalc</h2>
+    <p>FriendCalc is a fun friendship calculator created for entertainment. Enter two names, calculate a playful compatibility score, and share the result with your friends.</p>
+    <p><strong>These results are generated for fun and should not be interpreted as a real assessment of a relationship or friendship.</strong></p>
+  </div>
+</section>
+</main>
+ 
+<footer id="privacy">
+  <div class="logo">💕 FriendCalc</div>
+  <p class="foot-tag">Made for fun, friendship and memories.</p>
+  <ul class="foot-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#calculator">Calculator</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#privacy">Privacy</a></li>
+  </ul>
+  <p class="copyright">© 2026 FriendCalc. All rights reserved.</p>
+</footer>
+ 
+<script>
+(function(){
+  "use strict";
+ 
+  /* ---------- Theme toggle ---------- */
+  var themeBtn = document.getElementById('themeBtn');
+  var stored = null;
+  try{ stored = localStorage.getItem('fc_theme'); }catch(e){}
+  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored === 'dark' || (!stored && prefersDark)){
+    document.body.setAttribute('data-theme','dark'); themeBtn.textContent = '☀️';
+  }
+  themeBtn.addEventListener('click', function(){
+    var isDark = document.body.getAttribute('data-theme') === 'dark';
+    document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    themeBtn.textContent = isDark ? '🌙' : '☀️';
+    try{ localStorage.setItem('fc_theme', isDark ? 'light' : 'dark'); }catch(e){}
+  });
+ 
+  /* ---------- Mobile nav ---------- */
+  var menuBtn = document.getElementById('menuBtn');
+  var navLinks = document.getElementById('navLinks');
+  menuBtn.addEventListener('click', function(){
+    var open = navLinks.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', open);
+  });
+  navLinks.addEventListener('click', function(e){
+    if(e.target.tagName === 'A'){ navLinks.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); }
+  });
+ 
+  /* ---------- Fade-in on scroll ---------- */
+  var fadeEls = document.querySelectorAll('.fade');
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('show'); io.unobserve(en.target); } });
+    }, {threshold:.15});
+    fadeEls.forEach(function(el){ io.observe(el); });
+  } else {
+    fadeEls.forEach(function(el){ el.classList.add('show'); });
+  }
+ 
+  /* ---------- Deterministic score generator ----------
+     Uses a simple string hash of the two names (order-independent,
+     case/whitespace-insensitive) mapped to a 0-100 range. */
+  function normalize(name){ return name.trim().toLowerCase().replace(/\s+/g,' '); }
+  function hashString(str){
+    var h = 0;
+    for(var i=0; i<str.length; i++){
+      h = (h * 31 + str.charCodeAt(i)) | 0;
+    }
+    return Math.abs(h);
+  }
+  function friendshipScore(a, b){
+    var na = normalize(a), nb = normalize(b);
+    // Sort so "Rahul,Priya" and "Priya,Rahul" give the same result.
+    var combined = [na, nb].sort().join('&');
+    var hash = hashString(combined);
+    return hash % 101; // 0-100 inclusive
+  }
+ 
+  function messageFor(pct){
+    if(pct >= 90) return "Best Friends Forever! 💕";
+    if(pct >= 75) return "An Amazing Friendship! 🤝";
+    if(pct >= 50) return "Great Friends! 😊";
+    if(pct >= 25) return "Your Friendship Has Potential! 🌟";
+    return "Maybe It's Time to Create Some Memories! 😄";
+  }
+ 
+  /* ---------- Validation ---------- */
+  var invalidChars = /[^a-zA-Z\u00C0-\u024F' -]/; // letters, accents, spaces, apostrophes, hyphens
+  function validateName(raw){
+    var v = raw.trim();
+    if(v.length === 0) return "Please enter a name.";
+    if(v.length > 40) return "That name is a bit too long (max 40 characters).";
+    if(invalidChars.test(v)) return "Please use letters only (no numbers or symbols).";
+    return "";
+  }
+ 
+  /* ---------- Calculator form ---------- */
+  var form = document.getElementById('calcForm');
+  var nameA = document.getElementById('nameA');
+  var nameB = document.getElementById('nameB');
+  var errA = document.getElementById('errA');
+  var errB = document.getElementById('errB');
+  var resultWrap = document.getElementById('resultWrap');
+  var pctNum = document.getElementById('pctNum');
+  var ringFg = document.getElementById('ringFg');
+  var resultMsg = document.getElementById('resultMsg');
+  var CIRC = 2 * Math.PI * 70;
+  var currentScore = 0, currentA = '', currentB = '';
+ 
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var msgA = validateName(nameA.value);
+    var msgB = validateName(nameB.value);
+    if(!msgA && !msgB && normalize(nameA.value) === normalize(nameB.value)){
+      msgB = "Try two different names for the best result!";
+    }
+    errA.textContent = msgA;
+    errB.textContent = msgB;
+    if(msgA || msgB){
+      (msgA ? nameA : nameB).focus();
+      return;
+    }
+    currentA = nameA.value.trim();
+    currentB = nameB.value.trim();
+    currentScore = friendshipScore(currentA, currentB);
+    showResult(currentScore);
+    saveHistory(currentA, currentB, currentScore);
+  });
+ 
+  function showResult(score){
+    resultWrap.classList.add('show');
+    resultMsg.textContent = messageFor(score);
+    var offset = CIRC - (CIRC * score / 100);
+    // reset then animate
+    ringFg.style.transition = 'none';
+    ringFg.setAttribute('stroke-dashoffset', CIRC);
+    void ringFg.offsetWidth;
+    ringFg.style.transition = '';
+    requestAnimationFrame(function(){ ringFg.setAttribute('stroke-dashoffset', offset); });
+    // count-up animation
+    var start = 0, duration = 900, startTime = null;
+    function step(ts){
+      if(!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / duration, 1);
+      pctNum.textContent = Math.round(progress * score);
+      if(progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+    resultWrap.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+ 
+  document.getElementById('againBtn').addEventListener('click', function(){
+    resultWrap.classList.remove('show');
+    nameA.value=''; nameB.value=''; errA.textContent=''; errB.textContent='';
+    nameA.focus();
+  });
+ 
+  document.getElementById('shareBtn').addEventListener('click', function(){
+    var text = "I got a " + currentScore + "% friendship score with " + currentB + " on FriendCalc! 💕";
+    if(navigator.share){
+      navigator.share({ text: text, title: "FriendCalc" }).catch(function(){});
+    } else {
+      copyToClipboard(text);
+    }
+  });
+ 
+  function copyToClipboard(text){
+    var done = function(){
+      var btn = document.getElementById('shareBtn');
+      var original = btn.textContent;
+      btn.textContent = '✅ Copied!';
+      setTimeout(function(){ btn.textContent = original; }, 1800);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(function(){ fallbackCopy(text, done); });
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+  function fallbackCopy(text, cb){
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    if(cb) cb();
+  }
+ 
+  /* ---------- History (localStorage) ---------- */
+  var HIST_KEY = 'fc_history';
+  var historyList = document.getElementById('historyList');
+  var historyEmpty = document.getElementById('historyEmpty');
+  var clearBtn = document.getElementById('clearHistoryBtn');
+ 
+  function loadHistory(){
+    try{
+      var raw = localStorage.getItem(HIST_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){ return []; }
+  }
+  function renderHistory(){
+    var items = loadHistory();
+    historyList.innerHTML = '';
+    if(items.length === 0){
+      historyEmpty.style.display = 'block';
+      return;
+    }
+    historyEmpty.style.display = 'none';
+    items.forEach(function(item){
+      var li = document.createElement('li');
+      li.textContent = item.a + ' ❤️ ' + item.b + ' — ' + item.score + '%';
+      historyList.appendChild(li);
+    });
+  }
+  function saveHistory(a, b, score){
+    try{
+      var items = loadHistory();
+      items.unshift({ a: a, b: b, score: score });
+      items = items.slice(0, 10); // max 10, most recent first
+      localStorage.setItem(HIST_KEY, JSON.stringify(items));
+      renderHistory();
+    }catch(e){ /* localStorage unavailable — silently skip history */ }
+  }
+  clearBtn.addEventListener('click', function(){
+    try{ localStorage.removeItem(HIST_KEY); }catch(e){}
+    renderHistory();
+  });
+  renderHistory();
+ 
+})();
+</script>
+</body>
+</html>
